@@ -7,7 +7,8 @@ import sys
 
 def runsCreated(AB, H, B1, B2, B3, HR, BB, IBB, HBP, SF, SH, GIDP, SB, CS, BPF):
 	timesOnBase = H + BB - CS + HBP - GIDP
-	basesAdvanced = (B1 + 2*B2 + 3*B3 + 4*HR) + .26*(BB - IBB + HBP) + .52*(SH + SF + SB)
+	#basesAdvanced = .82 * (B1 + 2*B2 + 3*B3 + 4*HR) + .37*(BB - IBB + HBP) + .45*(SH + SF + SB)
+	basesAdvanced = .93 * (B1 + 2*B2 + 3*B3 + 4*HR) + .24*(BB - IBB + HBP) + .57*(SH + SF + SB)
 	opportunities = AB + BB + HBP + SF + SH
 	if opportunities == 0:
 		return 0
