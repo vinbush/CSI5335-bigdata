@@ -19,6 +19,9 @@ def runsCreated27(AB, H, B1, B2, B3, HR, BB, IBB, HBP, SF, SH, GIDP, SB, CS, BPF
 		return 0
 	return (runsCreated(AB, H, B1, B2, B3, HR, BB, IBB, HBP, SF, SH, GIDP, SB, CS, BPF) * 27) / outs
 
+def rcPairAdder(x, y):
+	return ((x[0] + y[0]), (x[1] + y[1]))
+
 parser = argparse.ArgumentParser()
 parser.add_argument("year", help="The year to calculate RC for")
 parser.add_argument("-a", "--atbats", help="minimum at bats required to consider a player (default 0)", default=0, type=int)
@@ -82,22 +85,27 @@ battingWithBpf = (battingWithBpf
 if minAB > 0:
 	battingWithBpf = battingWithBpf.filter(battingWithBpf['AB'] >= minAB)
 
+# turns this dataframe into an RDD of Row objects
 playerRcBpf = (battingWithBpf.rdd
+	# maps the RDD into <k, v> where k is player ID and v is a tuple (RC, RC27)
 	.map(lambda r:
 		(
 			r['playerID'],
-			round(runsCreated(r['AB'], r['H'], (r['1B']),
+			(round(runsCreated(r['AB'], r['H'], (r['1B']),
 				r['2B'], r['3B'], r['HR'], r['BB'], r['IBB'], r['HBP'],
 				r['SF'], r['SH'], r['GIDP'], r['SB'], r['CS'], r['BPF']), 2),
 			round(runsCreated27(r['AB'], r['H'], (r['1B']),
 				r['2B'], r['3B'], r['HR'], r['BB'], r['IBB'], r['HBP'],
-				r['SF'], r['SH'], r['GIDP'], r['SB'], r['CS'], r['BPF']), 2)
+				r['SF'], r['SH'], r['GIDP'], r['SB'], r['CS'], r['BPF']), 2))
 		)
 	)
+	# sum the RC and RC27 by player
+	.reduceByKey(rcPairAdder)
+	# expand out the RC, RC27 tuple (so it maps easier to a dataframe for export)
+	.map(lambda r: (r[0], r[1][0], r[1][1]))
+	# sort by RC or RC27
 	.sortBy(lambda r: r[sortIndex], ascending=False)
 )
-
-print(playerRcBpf)
 
 output = spark.createDataFrame(playerRcBpf)
 
@@ -105,5 +113,5 @@ if players > 0:
 	output = output.limit(players)
 
 #output = output.map(lambda r: ','.join([r[0], str(r[1]), str(r[2])]))
-output.write.csv("C:\\Users\\Vincent\\pyspark-scripts\\test" + datetime.now().strftime("%Y-%m-%d_%H%M%S") + ".csv")
+output.write.csv("C:\\Users\\Vincent\\pyspark-scripts\\bushong_phase1_" + datetime.now().strftime("%Y-%m-%d_%H%M%S") + ".csv")
 #output.saveAsTextFile("C:\\Users\\Vincent\\pyspark-scripts\\test" + datetime.now().strftime("%Y-%m-%d_%H%M%S") + ".csv")

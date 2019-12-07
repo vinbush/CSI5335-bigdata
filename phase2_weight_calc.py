@@ -81,16 +81,24 @@ teamBatting = (teamBatting
 
 # Reorganize equation to consider three terms 
 teamBatting = (teamBatting
-	.withColumn('B', (teamBatting['TotalBases'] * teamBatting['OnBase'] / teamBatting['Opportunities']) / (((teamBatting['BPF'] / 100) + 1) / 2))
-	.withColumn('C', (teamBatting['AdjustedWalks'] * teamBatting['OnBase'] / teamBatting['Opportunities']) / (((teamBatting['BPF'] / 100) + 1) / 2))
-	.withColumn('D', (teamBatting['SacrificesSteals'] * teamBatting['OnBase'] / teamBatting['Opportunities']) / (((teamBatting['BPF'] / 100) + 1) / 2))
+	.withColumn('B', (teamBatting['TotalBases'] * teamBatting['OnBase'] / teamBatting['Opportunities']))
+	.withColumn('C', (teamBatting['AdjustedWalks'] * teamBatting['OnBase'] / teamBatting['Opportunities']))
+	.withColumn('D', (teamBatting['SacrificesSteals'] * teamBatting['OnBase'] / teamBatting['Opportunities']))
+)
+
+# Adjust runs for park factor
+teamBatting = (teamBatting
+	.withColumn('AdjustedRuns', teamBatting['R'] / (((teamBatting['BPF'] / 100) + 1) / 2))
 )
 
 vectorAssembler = VectorAssembler(inputCols = ['B', 'C', 'D'], outputCol = 'features')
 vbatting = vectorAssembler.transform(teamBatting)
-vbatting = vbatting.select(['features', 'R'])
+vbatting = vbatting.select(['features', 'AdjustedRuns'])
+#vbatting = vbatting.select(['features', 'R'])
 
-lr = LinearRegression(featuresCol = 'features', labelCol='R', maxIter=10, regParam=0.3, elasticNetParam=0.8)
+lr = LinearRegression(featuresCol = 'features', labelCol='AdjustedRuns', maxIter=10, regParam=0.3, elasticNetParam=0.8)
+#lr = LinearRegression(featuresCol = 'features', labelCol='R', maxIter=10, regParam=0.3, elasticNetParam=0.8)
+#lr = LinearRegression(featuresCol = 'features', labelCol='AdjustedRuns', maxIter=10)
 lr_model = lr.fit(vbatting)
 print("Coefficients: " + str(lr_model.coefficients))
 print("Intercept: " + str(lr_model.intercept))
@@ -101,45 +109,12 @@ print("r2: %f" % trainingSummary.r2)
 
 vbatting.describe().show()
 
-# print(battingWithBpf.groupBy('teamID').agg({
-# 	'AB': 'sum',
-# 	'H': 'sum',
-# 	'1B': 'sum',
-# 	'2B': 'sum',
-# 	'3B': 'sum',
-# 	'HR': 'sum',
-# 	'BB': 'sum',
-# 	'IBB': 'sum',
-# 	'HBP': 'sum',
-# 	'SF': 'sum',
-# 	'SH': 'sum',
-# 	'GIDP': 'sum',
-# 	'SB': 'sum',
-# 	'CS': 'sum',
-# 	'BPF': 'max'
-# }).collect())
+trainingSummary.predictions.show(30)
+trainingSummary.residuals.show()
 
+output = trainingSummary.predictions.select('AdjustedRuns', 'prediction')
 
+output.coalesce(1).write.csv("C:\\Users\\Vincent\\pyspark-scripts\\weightcalc" + datetime.now().strftime("%Y-%m-%d_%H%M%S") + ".csv")
 
-# playerRcBpf = (battingWithBpf.rdd
-# 	.map(lambda r:
-# 		(
-# 			r['playerID'],
-# 			round(runsCreated(r['AB'], r['H'], (r['1B']),
-# 				r['2B'], r['3B'], r['HR'], r['BB'], r['IBB'], r['HBP'],
-# 				r['SF'], r['SH'], r['GIDP'], r['SB'], r['CS'], r['BPF']), 2),
-# 			round(runsCreated27(r['AB'], r['H'], (r['1B']),
-# 				r['2B'], r['3B'], r['HR'], r['BB'], r['IBB'], r['HBP'],
-# 				r['SF'], r['SH'], r['GIDP'], r['SB'], r['CS'], r['BPF']), 2)
-# 		)
-# 	)
-# 	.sortBy(lambda r: r['playerID'])
-# )
-
-# print(playerRcBpf)
-
-# output = spark.createDataFrame(playerRcBpf)
-
-# #output = output.map(lambda r: ','.join([r[0], str(r[1]), str(r[2])]))
 # output.write.csv("C:\\Users\\Vincent\\pyspark-scripts\\test" + datetime.now().strftime("%Y-%m-%d_%H%M%S") + ".csv")
 # #output.saveAsTextFile("C:\\Users\\Vincent\\pyspark-scripts\\test" + datetime.now().strftime("%Y-%m-%d_%H%M%S") + ".csv")

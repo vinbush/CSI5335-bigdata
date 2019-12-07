@@ -2,6 +2,8 @@ from pyspark import SparkContext
 from pyspark.sql import SparkSession
 from pyspark.sql.types import IntegerType
 from datetime import datetime
+from operator import add
+from pyspark.sql import functions as sf
 import argparse
 import sys
 
@@ -89,7 +91,7 @@ if minAB > 0:
 playerRcBpf = (battingWithBpf.rdd
 	.map(lambda r:
 		(
-			r['playerID'],
+			r['teamID'],
 			round(runsCreated(r['AB'], r['H'], (r['1B']),
 				r['2B'], r['3B'], r['HR'], r['BB'], r['IBB'], r['HBP'],
 				r['SF'], r['SH'], r['GIDP'], r['SB'], r['CS'], r['BPF']), 2),
@@ -98,16 +100,16 @@ playerRcBpf = (battingWithBpf.rdd
 				r['SF'], r['SH'], r['GIDP'], r['SB'], r['CS'], r['BPF']), 2)
 		)
 	)
-	.sortBy(lambda r: r[sortIndex], ascending=False)
+	#.sortBy(lambda r: r[sortIndex], ascending=False)
 )
 
-print(playerRcBpf)
+output = spark.createDataFrame(playerRcBpf, ['teamID', 'RC', 'RC27']).coalesce(1).orderBy('RC', ascending=False)
 
-output = spark.createDataFrame(playerRcBpf)
+output = output.groupBy('teamID').agg(sf.sum('RC').alias('RC'), sf.sum('RC27').alias('R27'))
 
 if players > 0:
 	output = output.limit(players)
 
 #output = output.map(lambda r: ','.join([r[0], str(r[1]), str(r[2])]))
-output.write.csv("C:\\Users\\Vincent\\pyspark-scripts\\phase2" + datetime.now().strftime("%Y-%m-%d_%H%M%S") + ".csv")
+output.write.csv("C:\\Users\\Vincent\\pyspark-scripts\\phase2_team_test" + datetime.now().strftime("%Y-%m-%d_%H%M%S") + ".csv", header=True)
 #output.saveAsTextFile("C:\\Users\\Vincent\\pyspark-scripts\\test" + datetime.now().strftime("%Y-%m-%d_%H%M%S") + ".csv")
