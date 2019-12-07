@@ -57,6 +57,11 @@ function prepData() {
 	// set up DataTable
 	$('table').DataTable({
 		dom: 'Bfrtip',
-		buttons: ['csv']
+		buttons: [
+			{
+				extend: 'csv',
+				filename: year + '_pitching'
+			}
+		]
 	});
 }

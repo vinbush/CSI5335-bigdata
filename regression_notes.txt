@@ -1,0 +1,15 @@
+2017 actual: 22582
+2018 actual: 21630
+
+### regParam=0.3, elasticNetParam=0.8 ###
+- Coefficients:
+	- 0.9987044787802928
+	- 0.21029122846958778
+	- 0.39392640459716954
+- RMSE: 21.440462
+- r^2: 0.999194
+- Predictions
+	- 2017: 22541 (actual 22582, 0.1% error; base RC formula w/ park factor 23561, error 4.3%)
+	- 2018: 21396 (actual 21630, 1.1% error; base RC formula w/ park factor 22376, error 3.4%)
+	
+	
