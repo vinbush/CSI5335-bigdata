@@ -44,9 +44,6 @@ sort = args.sort
 sortIndex = 1 if sort == "RC" else 2
 players = args.players
 
-print(year, minAB, sort, players)
-print(sortIndex)
-
 battingFile = "C:\\Users\\Vincent\\Downloads\\baseballdatabank-2019.2\\baseballdatabank-2019.2\\core\\Batting.csv"
 teamsFile = "C:\\Users\\Vincent\\Downloads\\baseballdatabank-2019.2\\baseballdatabank-2019.2\\core\\Teams.csv"
 
@@ -111,6 +108,4 @@ output = spark.createDataFrame(playerRcBpf)
 if players > 0:
 	output = output.limit(players)
 
-#output = output.map(lambda r: ','.join([r[0], str(r[1]), str(r[2])]))
 output.write.csv("C:\\Users\\Vincent\\pyspark-scripts\\bushong_phase1_" + datetime.now().strftime("%Y-%m-%d_%H%M%S") + ".csv")
-#output.saveAsTextFile("C:\\Users\\Vincent\\pyspark-scripts\\test" + datetime.now().strftime("%Y-%m-%d_%H%M%S") + ".csv")

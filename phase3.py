@@ -11,13 +11,16 @@ def runsCreated(AB, H, B1, B2, B3, HR, BB, IBB, HBP, SF, SH, GIDP, SB, CS, BPF):
 	opportunities = AB + BB + HBP + SF + SH
 	if opportunities == 0:
 		return 0
-	return ((timesOnBase * basesAdvanced) / opportunities) / (BPF / 100)
+	return ((timesOnBase * basesAdvanced) / opportunities) / (((BPF / 100) + 1) / 2)
 
 def runsCreated27(AB, H, B1, B2, B3, HR, BB, IBB, HBP, SF, SH, GIDP, SB, CS, BPF):
 	outs = AB - H + SF + SH + GIDP + CS
 	if outs == 0:
 		return 0
 	return (runsCreated(AB, H, B1, B2, B3, HR, BB, IBB, HBP, SF, SH, GIDP, SB, CS, BPF) * 27) / outs
+
+def rcPairAdder(x, y):
+	return ((x[0] + y[0]), (x[1] + y[1]))
 
 parser = argparse.ArgumentParser()
 parser.add_argument("year", help="The year to calculate RC for")
@@ -41,12 +44,7 @@ sort = args.sort
 sortIndex = 1 if sort == "RC" else 2
 players = args.players
 
-print(year, minAB, sort, players)
-print(sortIndex)
-
-#battingFile = "C:\\Users\\Vincent\\Downloads\\baseballdatabank-2019.2\\baseballdatabank-2019.2\\core\\Batting.csv"
-#battingFile = "C:\\Users\\Vincent\\pyspark-scripts\\Batting_alt_BB.csv"
-pitchingFile = "C:\\Users\\Vincent\\pyspark-scripts\\2017_pitching.csv"
+pitchingFile = "C:\\Users\\Vincent\\pyspark-scripts\\pitching_combined\\bushong_phase3_combined.csv"
 teamsFile = "C:\\Users\\Vincent\\Downloads\\baseballdatabank-2019.2\\baseballdatabank-2019.2\\core\\Teams.csv"
 
 spark = SparkSession.builder \
@@ -54,57 +52,60 @@ spark = SparkSession.builder \
         .appName("baseball") \
         .getOrCreate()
 
-batting = spark.read.csv(battingFile, header=True)
-teamsBpf = spark.read.csv(teamsFile, header=True).select('teamID', 'yearID', 'BPF')
+pitching = spark.read.csv(pitchingFile, header=True)
+teamsPpf = spark.read.csv(teamsFile, header=True).select('teamID', 'yearID', 'PPF') # for the pitching park factor
 
-# join batter data with the team id
-battingWithBpf = batting.filter(batting['yearID'] == year).join(teamsBpf.filter(teamsBpf['yearID'] == year), 'teamID')
+# join pitching data with the team data on team id, to get the park factor
+pitchingWithPpf = pitching.filter(pitching['yearID'] == year).join(teamsPpf.filter(teamsPpf['yearID'] == year), 'teamID')
 
 # column changes: calculate singles, and convert everything to integers
-battingWithBpf = (battingWithBpf
-	.withColumn('1B', battingWithBpf['H'] - battingWithBpf['2B'] - battingWithBpf['3B'] - battingWithBpf['HR'])
-	.withColumn('AB', battingWithBpf['AB'].cast(IntegerType()))
-	.withColumn('H', battingWithBpf['H'].cast(IntegerType()))
-	.withColumn('2B', battingWithBpf['2B'].cast(IntegerType()))
-	.withColumn('3B', battingWithBpf['3B'].cast(IntegerType()))
-	.withColumn('HR', battingWithBpf['HR'].cast(IntegerType()))
-	.withColumn('BB', battingWithBpf['BB'].cast(IntegerType()))
-	.withColumn('IBB', battingWithBpf['IBB'].cast(IntegerType()))
-	.withColumn('HBP', battingWithBpf['HBP'].cast(IntegerType()))
-	.withColumn('SF', battingWithBpf['SF'].cast(IntegerType()))
-	.withColumn('SH', battingWithBpf['SH'].cast(IntegerType()))
-	.withColumn('GIDP', battingWithBpf['GIDP'].cast(IntegerType()))
-	.withColumn('SB', battingWithBpf['SB'].cast(IntegerType()))
-	.withColumn('CS', battingWithBpf['CS'].cast(IntegerType()))
-	.withColumn('BPF', battingWithBpf['BPF'].cast(IntegerType()))
+pitchingWithPpf = (pitchingWithPpf
+	.withColumn('1B', pitchingWithPpf['H'] - pitchingWithPpf['2B'] - pitchingWithPpf['3B'] - pitchingWithPpf['HR'])
+	.withColumn('AB', pitchingWithPpf['AB'].cast(IntegerType()))
+	.withColumn('H', pitchingWithPpf['H'].cast(IntegerType()))
+	.withColumn('2B', pitchingWithPpf['2B'].cast(IntegerType()))
+	.withColumn('3B', pitchingWithPpf['3B'].cast(IntegerType()))
+	.withColumn('HR', pitchingWithPpf['HR'].cast(IntegerType()))
+	.withColumn('BB', pitchingWithPpf['BB'].cast(IntegerType()))
+	.withColumn('IBB', pitchingWithPpf['IBB'].cast(IntegerType()))
+	.withColumn('HBP', pitchingWithPpf['HBP'].cast(IntegerType()))
+	.withColumn('SF', pitchingWithPpf['SF'].cast(IntegerType()))
+	.withColumn('SH', pitchingWithPpf['SH'].cast(IntegerType()))
+	.withColumn('GIDP', pitchingWithPpf['GIDP'].cast(IntegerType()))
+	.withColumn('SB', pitchingWithPpf['SB'].cast(IntegerType()))
+	.withColumn('CS', pitchingWithPpf['CS'].cast(IntegerType()))
+	.withColumn('PPF', pitchingWithPpf['PPF'].cast(IntegerType()))
 )
 
 # filter minimum at-bats, if specified
 if minAB > 0:
-	battingWithBpf = battingWithBpf.filter(battingWithBpf['AB'] >= minAB)
+	pitchingWithPpf = pitchingWithPpf.filter(pitchingWithPpf['AB'] >= minAB)
 
-playerRcBpf = (battingWithBpf.rdd
+# turns this dataframe into an RDD of Row objects
+playerRcPpf = (pitchingWithPpf.rdd
+	# maps the RDD into <k, v> where k is player ID and v is a tuple (RC, RC27)
 	.map(lambda r:
 		(
 			r['playerID'],
-			round(runsCreated(r['AB'], r['H'], (r['1B']),
+			(round(runsCreated(r['AB'], r['H'], (r['1B']),
 				r['2B'], r['3B'], r['HR'], r['BB'], r['IBB'], r['HBP'],
-				r['SF'], r['SH'], r['GIDP'], r['SB'], r['CS'], r['BPF']), 2),
+				r['SF'], r['SH'], r['GIDP'], r['SB'], r['CS'], r['PPF']), 2),
 			round(runsCreated27(r['AB'], r['H'], (r['1B']),
 				r['2B'], r['3B'], r['HR'], r['BB'], r['IBB'], r['HBP'],
-				r['SF'], r['SH'], r['GIDP'], r['SB'], r['CS'], r['BPF']), 2)
+				r['SF'], r['SH'], r['GIDP'], r['SB'], r['CS'], r['PPF']), 2))
 		)
 	)
-	.sortBy(lambda r: r[sortIndex], ascending=False)
+	# sum the RC and RC27 by player
+	.reduceByKey(rcPairAdder)
+	# expand out the RC, RC27 tuple (so it maps easier to a dataframe for export)
+	.map(lambda r: (r[0], r[1][0], r[1][1]))
+	# sort by RC or RC27
+	.sortBy(lambda r: r[sortIndex], ascending=True)
 )
 
-print(playerRcBpf)
-
-output = spark.createDataFrame(playerRcBpf)
+output = spark.createDataFrame(playerRcPpf)
 
 if players > 0:
 	output = output.limit(players)
 
-#output = output.map(lambda r: ','.join([r[0], str(r[1]), str(r[2])]))
-output.write.csv("C:\\Users\\Vincent\\pyspark-scripts\\test" + datetime.now().strftime("%Y-%m-%d_%H%M%S") + ".csv")
-#output.saveAsTextFile("C:\\Users\\Vincent\\pyspark-scripts\\test" + datetime.now().strftime("%Y-%m-%d_%H%M%S") + ".csv")
+output.write.csv("C:\\Users\\Vincent\\pyspark-scripts\\bushong_phase3_" + datetime.now().strftime("%Y-%m-%d_%H%M%S") + ".csv")
