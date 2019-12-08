@@ -48,7 +48,6 @@ print(year, minAB, sort, players)
 print(sortIndex)
 
 battingFile = "C:\\Users\\Vincent\\Downloads\\baseballdatabank-2019.2\\baseballdatabank-2019.2\\core\\Batting.csv"
-#battingFile = "C:\\Users\\Vincent\\pyspark-scripts\\Batting_alt_BB.csv"
 teamsFile = "C:\\Users\\Vincent\\Downloads\\baseballdatabank-2019.2\\baseballdatabank-2019.2\\core\\Teams.csv"
 
 spark = SparkSession.builder \

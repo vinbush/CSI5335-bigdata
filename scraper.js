@@ -48,11 +48,31 @@ function prepData() {
 		}
 	});
 
-
 	// add a year column
 	var year = $('#tableHolder').data('year');
 	$("tbody tr").prepend("<td>" + year + "</td>");
 	$("thead tr").prepend("<th>yearID</th>")
+
+	// switch the team IDs to match Lahman's
+	var teamIdMap = new Map();
+	teamIdMap.set('CHC', 'CHA');
+	teamIdMap.set('CHW', 'CHN');
+	teamIdMap.set('KCR', 'KCA');
+	teamIdMap.set('LAD', 'LAN');
+	teamIdMap.set('NYM', 'NYA');
+	teamIdMap.set('NYY', 'NYN');
+	teamIdMap.set('SDP', 'SDN');
+	teamIdMap.set('SFG', 'SFN');
+	teamIdMap.set('STL', 'SLN');
+	teamIdMap.set('TBR', 'TBA');
+	teamIdMap.set('WSN', 'WAS');
+
+	$('td[data-stat="team_ID"]').map(function() {
+		var newValue = teamIdMap.get($(this).html());
+		if (newValue !== undefined) {
+			$(this).html(newValue);
+		}
+	});
 	
 	// set up DataTable
 	$('table').DataTable({

@@ -9,7 +9,7 @@ import sys
 
 ### getMlSuitableDataFrame ###
 # a procedure to get a dataframe suitable for regression calculation for teams for a specific year
-# only in a procedure so I don't have to copy this for the test year
+# only in a function so I don't have to copy this for the test year
 def getMlSuitableDataFrame(year):
   battingFile = "C:\\Users\\Vincent\\Downloads\\baseballdatabank-2019.2\\baseballdatabank-2019.2\\core\\Batting.csv"
   teamsFile = "C:\\Users\\Vincent\\Downloads\\baseballdatabank-2019.2\\baseballdatabank-2019.2\\core\\Teams.csv"
