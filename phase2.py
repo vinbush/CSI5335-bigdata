@@ -48,9 +48,17 @@ sort = args.sort
 sortIndex = 1 if sort == "RC" else 2
 players = args.players
 
-battingFile = "C:\\Users\\Vincent\\Downloads\\baseballdatabank-2019.2\\baseballdatabank-2019.2\\core\\Batting.csv"
-#battingFile = "C:\\Users\\Vincent\\pyspark-scripts\\Batting_alt_BB.csv"
-teamsFile = "C:\\Users\\Vincent\\Downloads\\baseballdatabank-2019.2\\baseballdatabank-2019.2\\core\\Teams.csv"
+# for local filesystem testing
+# battingFile = "C:\\Users\\Vincent\\Downloads\\baseballdatabank-2019.2\\baseballdatabank-2019.2\\core\\Batting.csv"
+# teamsFile = "C:\\Users\\Vincent\\Downloads\\baseballdatabank-2019.2\\baseballdatabank-2019.2\\core\\Teams.csv"
+
+# for local HDFS testing
+battingFile = "hdfs://localhost:9000/user/baseball/Batting.csv"
+teamsFile = "hdfs://localhost:9000/user/baseball/Teams.csv"
+
+# for submission
+# battingFile = "hdfs://localhost:8020/user/baseball/Batting.csv"
+# teamsFile = "hdfs://localhost:8020/user/baseball/Teams.csv"
 
 spark = SparkSession.builder \
         .master("local") \

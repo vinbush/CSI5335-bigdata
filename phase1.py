@@ -44,8 +44,17 @@ sort = args.sort
 sortIndex = 1 if sort == "RC" else 2
 players = args.players
 
-battingFile = "C:\\Users\\Vincent\\Downloads\\baseballdatabank-2019.2\\baseballdatabank-2019.2\\core\\Batting.csv"
-teamsFile = "C:\\Users\\Vincent\\Downloads\\baseballdatabank-2019.2\\baseballdatabank-2019.2\\core\\Teams.csv"
+# for local filesystem testing
+# battingFile = "C:\\Users\\Vincent\\Downloads\\baseballdatabank-2019.2\\baseballdatabank-2019.2\\core\\Batting.csv"
+# teamsFile = "C:\\Users\\Vincent\\Downloads\\baseballdatabank-2019.2\\baseballdatabank-2019.2\\core\\Teams.csv"
+
+# for local HDFS testing
+battingFile = "hdfs://localhost:9000/user/baseball/Batting.csv"
+teamsFile = "hdfs://localhost:9000/user/baseball/Teams.csv"
+
+# for submission
+# battingFile = "hdfs://localhost:8020/user/baseball/Batting.csv"
+# teamsFile = "hdfs://localhost:8020/user/baseball/Teams.csv"
 
 spark = SparkSession.builder \
         .master("local") \
@@ -108,4 +117,11 @@ output = spark.createDataFrame(playerRcBpf)
 if players > 0:
 	output = output.limit(players)
 
-output.write.csv("C:\\Users\\Vincent\\pyspark-scripts\\bushong_phase1_" + datetime.now().strftime("%Y-%m-%d_%H%M%S") + ".csv")
+# for local filesystem testing
+# output.write.csv("C:\\Users\\Vincent\\pyspark-scripts\\bushong_phase1_" + datetime.now().strftime("%Y-%m-%d_%H%M%S") + ".csv")
+
+# for local HDFS testing
+output.write.csv("hdfs://localhost:9000/user/bushong/bushong_phase1_" + datetime.now().strftime("%Y-%m-%d_%H%M%S") + ".csv")
+
+# for submission
+# output.write.csv("hdfs://localhost:8020/user/bushong/bushong_phase1_" + datetime.now().strftime("%Y-%m-%d_%H%M%S") + ".csv")
