@@ -39,9 +39,7 @@ pitchingDF = spark.read.csv(csvDF, header=True)
 # pitchingDF.write.csv("C:\\Users\\Vincent\\pyspark-scripts\\bushong_phase3_combined.csv", mode="overwrite", header="true")
 
 # for local HDFS testing
-pitchingDF.write.csv("hdfs://localhost:9000/user/bushong/DS/bushong_phase3_combined.csv", mode="overwrite", header="true")
+# pitchingDF.write.csv("hdfs://localhost:9000/user/bushong/DS/bushong_phase3_combined.csv", mode="overwrite", header="true")
 
 # for submission
-# pitchingDF.write.csv("hdfs://localhost:8020/user/bushong/DS/bushong_phase3_combined.csv", mode="overwrite", header="true")
-
-
+pitchingDF.write.csv("hdfs://localhost:8020/user/bushong/DS/bushong_phase3_combined.csv", mode="overwrite", header="true")

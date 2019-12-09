@@ -7,13 +7,8 @@ import sys
 
 def runsCreated(AB, H, B1, B2, B3, HR, BB, IBB, HBP, SF, SH, GIDP, SB, CS, BPF):
   timesOnBase = H + BB - CS + HBP - GIDP
-  #basesAdvanced = .82 * (B1 + 2*B2 + 3*B3 + 4*HR) + .37*(BB - IBB + HBP) + .45*(SH + SF + SB) 
-  #basesAdvanced = .93 * (B1 + 2*B2 + 3*B3 + 4*HR) + .24*(BB - IBB + HBP) + .57*(SH + SF + SB)
-  #basesAdvanced = 0.904886081472875 * (B1 + 2*B2 + 3*B3 + 4*HR) + 0.09235178878271577 * (BB - IBB + HBP) + 0.5751517433371399 * (SH + SF + SB) # w/ runs park adjusted
-  #basesAdvanced = .888 * (B1 + 2*B2 + 3*B3 + 4*HR) + .206*(BB - IBB + HBP) + .547*(SH + SF + SB) # just for fun, from 2016
-  #basesAdvanced = .908 * (B1 + 2*B2 + 3*B3 + 4*HR) + .095*(BB - IBB + HBP) + .592*(SH + SF + SB) # w/ no regparam or elasticnetparam
   basesAdvanced = (0.9987044787802928 * (B1 + 2*B2 + 3*B3 + 4*HR) +
-                   0.21029122846958778 *(BB - IBB + HBP) +
+                   0.21029122846958778 * (BB - IBB + HBP) +
                    0.39392640459716954 * (SH + SF + SB))
   opportunities = AB + BB + HBP + SF + SH
   if opportunities == 0:
@@ -53,12 +48,12 @@ players = args.players
 # teamsFile = "C:\\Users\\Vincent\\Downloads\\baseballdatabank-2019.2\\baseballdatabank-2019.2\\core\\Teams.csv"
 
 # for local HDFS testing
-battingFile = "hdfs://localhost:9000/user/baseball/Batting.csv"
-teamsFile = "hdfs://localhost:9000/user/baseball/Teams.csv"
+# battingFile = "hdfs://localhost:9000/user/baseball/Batting.csv"
+# teamsFile = "hdfs://localhost:9000/user/baseball/Teams.csv"
 
 # for submission
-# battingFile = "hdfs://localhost:8020/user/baseball/Batting.csv"
-# teamsFile = "hdfs://localhost:8020/user/baseball/Teams.csv"
+battingFile = "hdfs://localhost:8020/user/baseball/Batting.csv"
+teamsFile = "hdfs://localhost:8020/user/baseball/Teams.csv"
 
 spark = SparkSession.builder \
         .master("local") \
@@ -118,9 +113,9 @@ if players > 0:
 # output.write.csv("C:\\Users\\Vincent\\pyspark-scripts\\bushong_phase2_" + datetime.now().strftime("%Y-%m-%d_%H%M%S") + ".csv")
 
 # for local HDFS testing
-output.write.csv("hdfs://localhost:9000/user/bushong/ML/bushong_phase2_" + datetime.now().strftime("%Y-%m-%d_%H%M%S") + ".csv")
+# output.write.csv("hdfs://localhost:9000/user/bushong/ML/bushong_phase2_" + datetime.now().strftime("%Y-%m-%d_%H%M%S") + ".csv")
 
 # for submission
-# output.write.csv("hdfs://localhost:8020/user/bushong/ML/bushong_phase2_" + datetime.now().strftime("%Y-%m-%d_%H%M%S") + ".csv")
+output.write.csv("hdfs://localhost:8020/user/bushong/ML/bushong_phase2_" + datetime.now().strftime("%Y-%m-%d_%H%M%S") + ".csv")
 
 

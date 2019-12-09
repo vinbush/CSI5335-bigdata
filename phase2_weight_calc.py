@@ -16,12 +16,12 @@ def getMlSuitableDataFrame(year):
   # teamsFile = "C:\\Users\\Vincent\\Downloads\\baseballdatabank-2019.2\\baseballdatabank-2019.2\\core\\Teams.csv"
 
   # for local HDFS testing
-  battingFile = "hdfs://localhost:9000/user/baseball/Batting.csv"
-  teamsFile = "hdfs://localhost:9000/user/baseball/Teams.csv"
+  # battingFile = "hdfs://localhost:9000/user/baseball/Batting.csv"
+  # teamsFile = "hdfs://localhost:9000/user/baseball/Teams.csv"
 
   # for submission
-  # battingFile = "hdfs://localhost:8020/user/baseball/Batting.csv"
-  # teamsFile = "hdfs://localhost:8020/user/baseball/Teams.csv"
+  battingFile = "hdfs://localhost:8020/user/baseball/Batting.csv"
+  teamsFile = "hdfs://localhost:8020/user/baseball/Teams.csv"
 
   spark = SparkSession.builder \
           .master("local") \
@@ -112,7 +112,6 @@ testingData = getMlSuitableDataFrame(testYear)
 # set up the linear regression
 lr = LinearRegression(featuresCol = 'features', labelCol='AdjustedRuns', maxIter=10, regParam=0.3, elasticNetParam=0.8)
 lr.setFitIntercept(False) # if all the given stats are zero, runs created should be zero
-#lr = LinearRegression(featuresCol = 'features', labelCol='AdjustedRuns', maxIter=10)
 
 # apply the regression
 lr_model = lr.fit(trainingData)
@@ -122,6 +121,10 @@ print("Coefficients: " + str(lr_model.coefficients))
 print("Intercept (manually set to zero): " + str(lr_model.intercept))
 
 print("\n***Training data (2017)***")
+
+# show original data characteristics
+print("Original data:")
+trainingData.describe().show()
 
 # show RMSE and r squared on training data
 print("Training data results:")
@@ -141,6 +144,10 @@ testingSummary = lr_model.evaluate(testingData)
 
 print("\n***Testing data (2018)***")
 
+# show original data characteristics
+print("Original data:")
+testingData.describe().show()
+
 print("RMSE: %f" % testingSummary.rootMeanSquaredError)
 print("r2: %f" % testingSummary.r2)
 
@@ -150,4 +157,3 @@ print("\nTesting data residuals:")
 testingSummary.residuals.show(30)
 print("\nTesting data season runs prediction:")
 testingSummary.predictions.agg({'prediction': 'sum'}).show()
-

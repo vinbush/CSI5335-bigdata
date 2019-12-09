@@ -49,12 +49,12 @@ players = args.players
 # teamsFile = "C:\\Users\\Vincent\\Downloads\\baseballdatabank-2019.2\\baseballdatabank-2019.2\\core\\Teams.csv"
 
 # for local HDFS testing
-pitchingFile = "hdfs://localhost:9000/user/bushong/DS/bushong_phase3_combined.csv"
-teamsFile = "hdfs://localhost:9000/user/baseball/Teams.csv"
+# pitchingFile = "hdfs://localhost:9000/user/bushong/DS/bushong_phase3_combined.csv"
+# teamsFile = "hdfs://localhost:9000/user/baseball/Teams.csv"
 
 # for submission
-# pitchingFile = "hdfs://localhost:8020/user/bushong/DS/bushong_phase3_combined.csv"
-# teamsFile = "hdfs://localhost:8020/user/baseball/Teams.csv"
+pitchingFile = "hdfs://localhost:8020/user/bushong/DS/bushong_phase3_combined.csv"
+teamsFile = "hdfs://localhost:8020/user/baseball/Teams.csv"
 
 spark = SparkSession.builder \
         .master("local") \
@@ -126,8 +126,8 @@ if players > 0:
 # output.write.csv("C:\\Users\\Vincent\\pyspark-scripts\\bushong_phase3_" + datetime.now().strftime("%Y-%m-%d_%H%M%S") + ".csv")
 
 # for local HDFS testing
-output.write.csv("hdfs://localhost:9000/user/bushong/DS/bushong_phase3_" + datetime.now().strftime("%Y-%m-%d_%H%M%S") + ".csv")
+# output.write.csv("hdfs://localhost:9000/user/bushong/DS/bushong_phase3_" + datetime.now().strftime("%Y-%m-%d_%H%M%S") + ".csv")
 
 # for submission
-# output.write.csv("hdfs://localhost:8020/user/bushong/DS/bushong_phase3_" + datetime.now().strftime("%Y-%m-%d_%H%M%S") + ".csv")
+output.write.csv("hdfs://localhost:8020/user/bushong/DS/bushong_phase3_" + datetime.now().strftime("%Y-%m-%d_%H%M%S") + ".csv")
 
