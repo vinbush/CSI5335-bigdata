@@ -8,6 +8,6 @@ where ATBATS is the min atbats to list a player, RC or RC27 is the attribute to 
 
 The phase3_combination.py script runs with a single parameter -y, space-separated years to fetch and combine data for (fetches from my GitHub repo; 2015-2018 are available currently).
 
-The phase2_weight_calc.py script runs without arguments.
+The phase2_weight_calc.py script runs without arguments. It prints the coefficients calculated and the intercept, followed by some relevant data of the model (RMSE, R^2, the residuals, and the total season run prediction).
 
 Instructions for the scraper can be found upon opening it.
