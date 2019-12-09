@@ -1,0 +1,13 @@
+All 3 of the report-generating scripts (phase1.py, phase2.py, and phase3.py) generate time stamped CSVs in the form bushong_phaseX_timestamp.csv. The phase3_combination.py script for pulling and combining the phase 3 data will write (and overwrite) the bushong_phase3_combined.csv file for use by phase3.py (which will fail if that file is not yet generated).
+
+Usage is the same for each report script:
+
+<year> [-a ATBATS] [-s {RC,RC27}] [-p PLAYERS]
+
+where ATBATS is the min atbats to list a player, RC or RC27 is the attribute to sort by, and PLAYERS is the limit of players to print.
+
+The phase3_combination.py script runs with a single parameter -y, space-separated years to fetch and combine data for (fetches from my GitHub repo; 2015-2018 are available currently).
+
+The phase2_weight_calc.py script runs without arguments.
+
+Instructions for the scraper can be found upon opening it.
