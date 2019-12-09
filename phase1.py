@@ -121,7 +121,8 @@ if players > 0:
 # output.write.csv("C:\\Users\\Vincent\\pyspark-scripts\\bushong_phase1_" + datetime.now().strftime("%Y-%m-%d_%H%M%S") + ".csv")
 
 # for local HDFS testing
-output.write.csv("hdfs://localhost:9000/user/bushong/bushong_phase1_" + datetime.now().strftime("%Y-%m-%d_%H%M%S") + ".csv")
+output.write.csv("hdfs://localhost:9000/user/bushong/BD/bushong_phase1_" + datetime.now().strftime("%Y-%m-%d_%H%M%S") + ".csv")
 
 # for submission
-# output.write.csv("hdfs://localhost:8020/user/bushong/bushong_phase1_" + datetime.now().strftime("%Y-%m-%d_%H%M%S") + ".csv")
+# output.write.csv("hdfs://localhost:8020/user/bushong/BD/bushong_phase1_" + datetime.now().strftime("%Y-%m-%d_%H%M%S") + ".csv")
+

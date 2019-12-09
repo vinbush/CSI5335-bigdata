@@ -109,13 +109,18 @@ playerRcBpf = (battingWithBpf.rdd
   .sortBy(lambda r: r[sortIndex], ascending=False)
 )
 
-print(playerRcBpf)
-
 output = spark.createDataFrame(playerRcBpf)
 
 if players > 0:
   output = output.limit(players)
 
-#output = output.map(lambda r: ','.join([r[0], str(r[1]), str(r[2])]))
-output.write.csv("C:\\Users\\Vincent\\pyspark-scripts\\phase2" + datetime.now().strftime("%Y-%m-%d_%H%M%S") + ".csv")
-#output.saveAsTextFile("C:\\Users\\Vincent\\pyspark-scripts\\test" + datetime.now().strftime("%Y-%m-%d_%H%M%S") + ".csv")
+# for local filesystem testing
+# output.write.csv("C:\\Users\\Vincent\\pyspark-scripts\\bushong_phase2_" + datetime.now().strftime("%Y-%m-%d_%H%M%S") + ".csv")
+
+# for local HDFS testing
+output.write.csv("hdfs://localhost:9000/user/bushong/ML/bushong_phase2_" + datetime.now().strftime("%Y-%m-%d_%H%M%S") + ".csv")
+
+# for submission
+# output.write.csv("hdfs://localhost:8020/user/bushong/ML/bushong_phase2_" + datetime.now().strftime("%Y-%m-%d_%H%M%S") + ".csv")
+
+

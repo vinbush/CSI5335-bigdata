@@ -11,8 +11,17 @@ import sys
 # a procedure to get a dataframe suitable for regression calculation for teams for a specific year
 # only in a function so I don't have to copy this for the test year
 def getMlSuitableDataFrame(year):
-  battingFile = "C:\\Users\\Vincent\\Downloads\\baseballdatabank-2019.2\\baseballdatabank-2019.2\\core\\Batting.csv"
-  teamsFile = "C:\\Users\\Vincent\\Downloads\\baseballdatabank-2019.2\\baseballdatabank-2019.2\\core\\Teams.csv"
+  # for local filesystem testing
+  # battingFile = "C:\\Users\\Vincent\\Downloads\\baseballdatabank-2019.2\\baseballdatabank-2019.2\\core\\Batting.csv"
+  # teamsFile = "C:\\Users\\Vincent\\Downloads\\baseballdatabank-2019.2\\baseballdatabank-2019.2\\core\\Teams.csv"
+
+  # for local HDFS testing
+  battingFile = "hdfs://localhost:9000/user/baseball/Batting.csv"
+  teamsFile = "hdfs://localhost:9000/user/baseball/Teams.csv"
+
+  # for submission
+  # battingFile = "hdfs://localhost:8020/user/baseball/Batting.csv"
+  # teamsFile = "hdfs://localhost:8020/user/baseball/Teams.csv"
 
   spark = SparkSession.builder \
           .master("local") \
@@ -110,25 +119,35 @@ lr_model = lr.fit(trainingData)
 
 # output results
 print("Coefficients: " + str(lr_model.coefficients))
-print("Intercept: " + str(lr_model.intercept))
+print("Intercept (manually set to zero): " + str(lr_model.intercept))
+
+print("\n***Training data (2017)***")
 
 # show RMSE and r squared on training data
+print("Training data results:")
 trainingSummary = lr_model.summary
 print("RMSE: %f" % trainingSummary.rootMeanSquaredError)
 print("r2: %f" % trainingSummary.r2)
 
+print("\nTraining data predictions:")
 trainingSummary.predictions.show(30)
-trainingSummary.residuals.show()
+print("\nTraining data residuals:")
+trainingSummary.residuals.show(30)
+print("\nTraining data season runs prediction:")
+trainingSummary.predictions.agg({'prediction': 'sum'}).show()
 
 # test the regression
 testingSummary = lr_model.evaluate(testingData)
 
-trainingSummary.predictions.agg({'prediction': 'sum'}).show()
+print("\n***Testing data (2018)***")
+
+print("RMSE: %f" % testingSummary.rootMeanSquaredError)
+print("r2: %f" % testingSummary.r2)
+
+print("\nTesting data predictions:")
+testingSummary.predictions.show(30)
+print("\nTesting data residuals:")
+testingSummary.residuals.show(30)
+print("\nTesting data season runs prediction:")
 testingSummary.predictions.agg({'prediction': 'sum'}).show()
 
-# output = trainingSummary.predictions.select('AdjustedRuns', 'prediction')
-
-# output.coalesce(1).write.csv("C:\\Users\\Vincent\\pyspark-scripts\\weightcalc" + datetime.now().strftime("%Y-%m-%d_%H%M%S") + ".csv")
-
-# output.write.csv("C:\\Users\\Vincent\\pyspark-scripts\\test" + datetime.now().strftime("%Y-%m-%d_%H%M%S") + ".csv")
-# #output.saveAsTextFile("C:\\Users\\Vincent\\pyspark-scripts\\test" + datetime.now().strftime("%Y-%m-%d_%H%M%S") + ".csv")
